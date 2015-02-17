@@ -1,0 +1,30 @@
+<div ng-include="'components/navbar/navbar.html'"></div>
+<h2>/r/Amiibo Scalper Search</h2>
+<md-content>
+  <md-input-container>
+    <label>Search For User</label>
+    <input name="query" ng-model="query">
+  </md-input-container>
+  <md-list>
+    <md-item ng-repeat="user in users | filter: query">
+      <md-item-content>
+        <div class="md-tile-left">
+            <h3>{{users.indexOf(user) + 1}}</h3>
+        </div>
+        <div class="md-tile-content">
+          <h3>
+            <a ng-href="//reddit.com/user/{{user.username}}" target="_blank">/u/{{user.username}}</a>
+          </h3>
+          <h4>{{user.weights.total | percentage}}</h4>
+          <p>
+            {{user.days}} days on Reddit
+          </p>
+          <p>
+            Last updated: {{user.lastUpdated | date: 'medium'}}
+          </p>
+        </div>
+      </md-item-content>
+    </md-item>
+  </md-list>
+</md-content>
+<div ng-include="'components/footer/footer.html'"></div>

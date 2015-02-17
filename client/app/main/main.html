@@ -1,0 +1,18 @@
+<div ng-include="'components/navbar/navbar.html'"></div>
+<h2>/r/Amiibo Scalper Search</h2>
+<div layout="column" layout-margin layout-fill layout-padding>
+  <div flex>
+    <md-autocomplete
+      md-selected-item="selectedItem"
+      md-search-text="searchText"
+      md-items="item in querySearch(searchText)"
+      md-item-text="display"
+      placeholder="Type in a Reddit username...">
+      <span md-highlight-text="ctrl.searchText">{{item.display}}</span>
+    </md-autocomplete>
+  </div>
+  <div flex>
+    <md-button class="md-raised md-primary" ng-disabled="!searchText" ng-click="searchUser(selectedItem, searchText)">Search</md-button>
+  </div>
+</div>
+<div ng-include="'components/footer/footer.html'"></div>
