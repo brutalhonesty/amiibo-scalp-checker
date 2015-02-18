@@ -1,0 +1,18 @@
+.ct-chart .ct-series.ct-series-a .ct-point {
+  stroke: #3e94bb;
+}
+.ct-chart .ct-series.ct-series-b .ct-point {
+  stroke: #c65854;
+}
+.safe {
+  color: green;
+}
+.caution {
+  color: yellow;
+}
+.danger {
+  color: #9c3434;
+}
+a.users {
+  color: black;
+}

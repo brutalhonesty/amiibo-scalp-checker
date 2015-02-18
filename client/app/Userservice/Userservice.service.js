@@ -34,6 +34,12 @@ angular.module('redditAmiiboResellCheckerApp').service('Userservice', ['$http', 
         method: 'GET',
         url: '/api/users/scan/status?id=' + id
       });
+    },
+    getDays: function() {
+      return $http({
+        method: 'GET',
+        url: '/api/users/days'
+      });
     }
   };
 }]);

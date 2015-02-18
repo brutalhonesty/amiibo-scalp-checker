@@ -6,7 +6,8 @@ angular.module('redditAmiiboResellCheckerApp', [
   'ngSanitize',
   'ngRoute',
   'ngMaterial',
-  'percentage'
+  'percentage',
+  'angular-chartist'
 ]).config(function ($routeProvider, $locationProvider) {
   $routeProvider
     .otherwise({

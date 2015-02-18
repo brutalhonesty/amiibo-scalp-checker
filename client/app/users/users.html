@@ -2,7 +2,25 @@
 <h2>/r/Amiibo Scalper Search</h2>
 <div layout="column" layout-margin layout-fill layout-padding>
   <div flex>
-    {{user}}
+    <h2>
+      <a href="//reddit.com/user/{{user.username}}" class="users">/u/{{user.username}}</a> - <span class="safe" ng-if="user.weights.total <= 0.05">Not a scalper!</span><span class="caution md-warning" ng-if="user.weights.total > 0.05 &amp;&amp; user.weights.total < 0.15">Could be a scalper!</span><span class="danger" ng-if="user.weights.total > 0.15">Probably a scalper!</span></h2>
+    <h3>Days On Reddit: {{user.days}}</h3>
+    <h4>Average User: {{average}} days</h4>
+    <chartist class="ct-chart" chartist-data="daysData" chartist-chart-type="Line" chartist-chart-options="lineOptions" chartist-events="lineEvents" chartist-responsive-options="lineOptions"></chartist>
+    <div layout="row">
+      <div flex="33">
+        <h3>Comment Weight: {{(user.weights.comments.deleted + user.weights.comments.sarcasm + user.weights.comments.scalpRelated) | percentage}}</h3>
+        <chartist class="ct-chart" chartist-data="commentWeightsData" chartist-chart-type="Pie" chartist-chart-options="weightsOptions"></chartist>
+      </div>
+      <div flex="33">
+        <h3>Day Weight: {{user.weights.day | percentage}}</h3>
+        <chartist class="ct-chart" chartist-data="dayWeightsData" chartist-chart-type="Pie" chartist-chart-options="weightsOptions"></chartist>
+      </div>
+      <div flex="33">
+        <h3>Total Weight {{user.weights.total | percentage}}</h3>
+        <chartist class="ct-chart" chartist-data="totalWeightsData" chartist-chart-type="Pie" chartist-chart-options="weightsOptions"></chartist>
+      </div>
+    </div>
   </div>
 </div>
 <div ng-include="'components/footer/footer.html'"></div>
