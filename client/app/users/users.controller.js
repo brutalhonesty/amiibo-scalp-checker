@@ -34,7 +34,7 @@ angular.module('redditAmiiboResellCheckerApp').controller('UsersCtrl', ['$scope'
   Userservice.getUser(username).success(function (user) {
     $scope.user = user;
     $scope.commentWeightsData = {
-      series: [(user.weights.comments.deleted * 100), (user.weights.comments.sarcasm * 100), (user.weights.comments.scalpRelated * 100), 100 - ((user.weights.comments.deleted + user.weights.comments.sarcasm + user.weights.comments.scalpRelated) * 100)]
+      series: [((user.weights.comments.deleted + user.weights.comments.sarcasm + user.weights.comments.scalpRelated) * 100), 100 - ((user.weights.comments.deleted + user.weights.comments.sarcasm + user.weights.comments.scalpRelated) * 100)]
     };
     $scope.dayWeightsData = {
       series: [(user.weights.day * 100), (100 - (user.weights.day * 100))]

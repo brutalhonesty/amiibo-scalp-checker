@@ -6,7 +6,7 @@ var moment = require('moment');
 function _checkJobLife(lastUpdated, state) {
   var lastUpdated = moment.utc(lastUpdated);
   var now = moment();
-  if(state === 'complete') {
+  if(state === 'complete' || state === 'failed') {
     return true;
   } else if (now.diff(lastUpdated) >= 300000) {
     return true;
@@ -26,9 +26,15 @@ exports.index = function(req, res) {
         if(error) {
           return res.status(500).jsonp({message: 'Issue retreiving job status.'});
         }
+        if(job.progress() === undefined) {
+          return res.status(400).jsonp({message: 'Invalid id.'});
+        }
         return res.jsonp({progress: job.progress()});
       });
     } else {
+      if(job.progress() === undefined) {
+        return res.status(400).jsonp({message: 'Invalid id.'});
+      }
       return res.jsonp({progress: job.progress()});
     }
   });

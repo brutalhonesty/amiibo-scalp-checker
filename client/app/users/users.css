@@ -4,6 +4,9 @@
 .ct-chart .ct-series.ct-series-b .ct-point {
   stroke: #c65854;
 }
+.ct-chart .ct-series.ct-series-b .ct-slice:not(.ct-donut) {
+  fill: ;
+}
 .safe {
   color: green;
 }
@@ -14,5 +17,9 @@
   color: #9c3434;
 }
 a.users {
+  color: black;
+}
+.ct-chart .ct-label {
+  fill: black;
   color: black;
 }

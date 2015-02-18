@@ -156,7 +156,7 @@ function _analyzeComments(comments, callback) {
   var sellRegExp = new RegExp(/([I|i])?(\s)?([R|r]e)?[S|s]ell(ing)?/g);
   var preOrderRegExp = new RegExp(/[P|p]re(-)?[O|o]rder(ed)?\s(([2-9]|[2-9]\d|\d{2,}))/g);
   var scoredRegExp = new RegExp(/[S|s]core(d)?\s(([2-9]|[2-9]\d|\d{2,}))/g);
-  var amiiboRegExp = new RegExp(/((([2-9]|[2-9]\d|\d{2,}))|([[T|t](wo|hree|en)|[F|f](our|ive)|[S|s](ix|even)|[E|e]ight|[N|n]ine]))\s([M|m]ario(s)?|[P|p]each(s)?|[Y|y]oshi(s)?|[D|d]onkey(\s)?[K|k]ong(s)?|[L|l]ink(s)?|[F|f]ox((es)?|(s)?)|[S|s]amus((es)?|(s)?)|[W|w]ii(\s)?[F|f]it(\s)?[T|t]rainer(s)?|[V|v]illager(s)?|[P|p]ikachu(s)?|[K|k]irb(y|ies|s)|[L|l]ittle(\s)?[M|m]ac(s)?|[C|c]aptain(\s)?[F|f]alcon(s)?|[P|p]it(s)?|[R|r]osalina(s)?|[B|b]owser(s)|[L|l]ucario(s)?|[T|t]oon(\s)?[L|l]ink(s)?|[S|s]heik(s)?|[K|k]ing\s[D|d]edede(s)?|[D|d]3(s)?|[I|i]ke(s)?|[S|]hulk(s)?|[S|s]onic(s)?|[M|m]ega(\s)?[M|m][a|e]n|[M|m]eta(\s)?([K|k])?night(s)?|[R|r]obin(s)?|[L|l]ucina(s)|[C|c]harizard(s)?|[P|p]ac((\s)?|(-)?)[M|m]an(s)?|[W|w]ario(s)?|[N|n]ess(es)?|[A|a]miibo(es|s)?)/g);
+  var amiiboRegExp = new RegExp(/((([2-9]|[2-9]\d|\d{2,}))|([[T|t](wo|hree|en)|[F|f](our|ive)|[S|s](ix|even)|[E|e]ight|[N|n]ine]))\s([M|m]ario(s)?|[P|p]each(s)?|[Y|y]oshi(s)?|[D|d]onkey(\s)?[K|k]ong(s)?|[L|l]ink(s)?|[F|f]ox((es)?|(s)?)|[S|s]amus((es)?|(s)?)|[W|w]ii(\s)?[F|f]it(\s)?[T|t]rainer(s)?|[V|v]illager(s)?|[P|p]ikachu(s)?|[K|k]irb(y|ies|s)|[L|l]ittle(\s)?[M|m]ac(s)?|[C|c]aptain(\s)?[F|f]alcon(s)?|[P|p]it(s)?|[R|r]osalina(s)?|[B|b]owser(s)|[L|l]ucario(s)?|[T|t]oon(\s)?[L|l]ink(s)?|[S|s]heik(s)?|[K|k]ing\s[D|d]edede(s)?|[D|d]3(s)?|[K|k]3[D|d](s)?|[I|i]ke(s)?|[S|]hulk(s)?|[S|s]onic(s)?|[M|m]ega(\s)?[M|m][a|e]n|[M|m]eta(\s)?([K|k])?night(s)?|[R|r]obin(s)?|[L|l]ucina(s)|[C|c]harizard(s)?|[P|p]ac((\s)?|(-)?)[M|m]an(s)?|[W|w]ario(s)?|[N|n]ess(es)?|[A|a]miibo(es|s)?)/g);
   var ebayRegExp = new RegExp(/[E|e]bay/g);
   // TODO add Craigslist/Kijiji regex
   var scalpComments = [];
@@ -216,7 +216,7 @@ function _checkComments(job, username, callback) {
       }
       job.progress(25, 100);
       if(comments.length === 0) {
-        return callback(null, commentsWeights);
+        return callback(null, {weights: commentsWeights, comments: {bad: [], scalp: []}});
       }
       _detectCommentSarcasm(comments, function (error, commentObj) {
         if(error) {
@@ -249,7 +249,7 @@ function _checkComments(job, username, callback) {
               } else {
                 commentsWeights.scalpRelated = parseFloat((commentObj.scalp.length / commentObj.bad.length), 10) * 0.85;
               }
-              return callback(null, commentsWeights);
+              return callback(null, {weights: commentsWeights, comments: commentObj});
             });
           });
         });
@@ -307,13 +307,16 @@ function _storeDBAge(username, daysOnReddit, callback) {
   });
 }
 
-function _storeUser(weights, username, days, callback) {
+function _storeUser(data, username, days, callback) {
+  var weights = data.weights;
+  var comments = data.comments;
   var userRef = ref.child('users').child(username);
   userRef.set({
     weights: weights,
     username: username,
     days: days,
-    lastUpdated: moment.utc().valueOf()
+    lastUpdated: moment.utc().valueOf(),
+    comments: comments
   }, function (error) {
     if(error) {
       return callback(error);
@@ -371,10 +374,7 @@ function _computeDayWeight(age, daysOnReddit, callback) {
   var dayWeight = 0.0;
   var average = age.average;
   if(average - daysOnReddit > 0) {
-    console.log(average);
-    console.log(daysOnReddit);
     dayWeight = (daysOnReddit / average) * 0.80;
-    console.log(dayWeight);
   } else {
     dayWeight = (average / daysOnReddit) * 0.20;
   }
@@ -402,18 +402,23 @@ exports.scan = function () {
     var username = job.data.username;
     _getRedditAge(job, username, function (error, age) {
       if(error) {
+        console.log(error);
         return done(new Error(error));
       }
       var redditStartDate = moment.utc(age);
       var now = moment.utc();
       var daysOnReddit = now.diff(redditStartDate, 'days');
-      _checkComments(job, username, function (error, commentsWeights) {
+      _checkComments(job, username, function (error, commentObj) {
         if(error) {
+          console.log(error);
           return done(new Error(error));
         }
+        var commentsWeights = commentObj.weights;
+        var badComments = commentObj.comments;
         // TODO Add an administrative method to flag people as scalpers based on a post(s).
         _calculateTotalWeight(username, daysOnReddit, commentsWeights, function (error, weights) {
           if(error) {
+            console.log(error);
             return done(new Error(error));
           }
           job.progress(70, 100);
@@ -423,11 +428,15 @@ exports.scan = function () {
             }
             job.progress(90, 100);
             _storeUser({
-              total: weights.total,
-              day: weights.day,
-              comments: commentsWeights
+              weights: {
+                total: weights.total,
+                day: weights.day,
+                comments: commentsWeights
+              },
+              comments: badComments
             }, username, daysOnReddit, function (error) {
               if(error) {
+                console.log(error);
                 return done(new Error(error));
               }
               job.progress(100, 100);
