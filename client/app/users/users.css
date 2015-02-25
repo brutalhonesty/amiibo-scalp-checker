@@ -4,9 +4,6 @@
 .ct-chart .ct-series.ct-series-b .ct-point {
   stroke: #c65854;
 }
-.ct-chart .ct-series.ct-series-b .ct-slice:not(.ct-donut) {
-  fill: ;
-}
 .safe {
   color: green;
 }
